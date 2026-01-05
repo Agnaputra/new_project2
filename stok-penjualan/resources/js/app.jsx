@@ -3,7 +3,7 @@ import '../css/app.css';
 
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App1'; // Memastikan file App1.js terpanggil
+import App from './App1';
 
 const container = document.getElementById('app');
 

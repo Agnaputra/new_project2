@@ -7,16 +7,10 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/css/app.css',
-                'resources/js/app.jsx',
+                'resources/js/app.jsx', // Pastikan ekstensi .jsx
             ],
             refresh: true,
         }),
         react(),
     ],
-    // Tambahkan bagian ini untuk mendukung JSX di file .js
-    esbuild: {
-        loader: 'jsx',
-        include: /resources\/js\/.*\.js$/,
-        exclude: [],
-    },
 });
