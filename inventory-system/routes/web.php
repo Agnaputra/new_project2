@@ -4,6 +4,7 @@ use App\Livewire\Dashboard;
 use App\Livewire\ProductForm;
 use App\Livewire\ProductList;
 use App\Livewire\SalesTransaction;
+use App\Http\Controllers\ProductImportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
