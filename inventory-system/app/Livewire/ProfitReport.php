@@ -3,43 +3,75 @@
 namespace App\Livewire;
 
 use App\Models\Sale;
+use App\Models\Product;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
-use Livewire\WithPagination;
 
 class ProfitReport extends Component
 {
-    use WithPagination;
-
     public $startDate;
     public $endDate;
+    public $totalProfit = 0;
+    public $totalRevenue = 0;
+    public $totalCost = 0;
+    public $profitMargin = 0;
+    public $dailyProfits = [];
 
     public function mount()
     {
-        // Default filter bulan ini
-        $this->startDate = date('Y-m-01');
-        $this->endDate = date('Y-m-t');
+        $this->startDate = now()->subDays(30)->format('Y-m-d');
+        $this->endDate = now()->format('Y-m-d');
+        $this->loadReport();
     }
 
-    public function updatedStartDate() { $this->resetPage(); }
-    public function updatedEndDate() { $this->resetPage(); }
+    public function updatedStartDate()
+    {
+        $this->loadReport();
+    }
+
+    public function updatedEndDate()
+    {
+        $this->loadReport();
+    }
+
+    public function loadReport()
+    {
+        // Summary data
+        $data = Sale::whereBetween('created_at', [$this->startDate . ' 00:00:00', $this->endDate . ' 23:59:59'])
+            ->select(
+                DB::raw('SUM(total_harga) as revenue'),
+                DB::raw('SUM(total_profit) as profit')
+            )
+            ->first();
+
+        $this->totalRevenue = $data->revenue ?? 0;
+        $this->totalProfit = $data->profit ?? 0;
+        $this->totalCost = $this->totalRevenue - $this->totalProfit;
+        $this->profitMargin = $this->totalRevenue > 0 
+            ? ($this->totalProfit / $this->totalRevenue) * 100 
+            : 0;
+
+        // Daily profits for chart
+        $this->dailyProfits = Sale::whereBetween('created_at', [$this->startDate . ' 00:00:00', $this->endDate . ' 23:59:59'])
+            ->select(
+                DB::raw('DATE(created_at) as date'),
+                DB::raw('SUM(total_profit) as profit'),
+                DB::raw('SUM(total_harga) as revenue')
+            )
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => \Carbon\Carbon::parse($item->date)->format('d M'),
+                    'profit' => (float) $item->profit,
+                    'revenue' => (float) $item->revenue,
+                ];
+            })->toArray();
+    }
 
     public function render()
     {
-        $sales = Sale::query()
-            ->when($this->startDate, fn($q) => $q->whereDate('created_at', '>=', $this->startDate))
-            ->when($this->endDate, fn($q) => $q->whereDate('created_at', '<=', $this->endDate))
-            ->latest()
-            ->paginate(10);
-
-        // Menghitung total profit dari semua data (bukan hanya yang di-paginate)
-        $summaryProfit = Sale::query()
-            ->when($this->startDate, fn($q) => $q->whereDate('created_at', '>=', $this->startDate))
-            ->when($this->endDate, fn($q) => $q->whereDate('created_at', '<=', $this->endDate))
-            ->sum('total_profit');
-
-        return view('livewire.profit-report', [
-            'sales' => $sales,
-            'summaryProfit' => $summaryProfit
-        ]);
+        return view('livewire.profit-report');
     }
 }
