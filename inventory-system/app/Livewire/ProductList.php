@@ -5,54 +5,73 @@ namespace App\Livewire;
 use App\Models\Product;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Title;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class ProductList extends Component
 {
     use WithPagination;
-
+    
     public $search = '';
-    public $filterCategory = '';
-
-    protected $queryString = ['search', 'filterCategory'];
-
+    public $filterKategori = '';
+    
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'filterKategori' => ['except' => ''],
+    ];
+    
     public function updatingSearch()
     {
         $this->resetPage();
     }
-
-    public function updatingFilterCategory()
+    
+    public function updatingFilterKategori()
     {
         $this->resetPage();
     }
-
+    
     public function delete($id)
     {
         try {
-            Product::findOrFail($id)->delete();
-            session()->flash('success', 'Produk berhasil dihapus!');
+            $product = Product::findOrFail($id);
+            $productName = $product->nama;
+            $product->delete();
+            
+            session()->flash('success', '✅ Produk "' . $productName . '" berhasil dihapus!');
+            
+            \Log::info('Product deleted', ['id' => $id, 'name' => $productName]);
         } catch (\Exception $e) {
-            session()->flash('error', 'Gagal menghapus produk: ' . $e->getMessage());
+            session()->flash('error', '❌ Gagal menghapus produk: ' . $e->getMessage());
+            \Log::error('Delete product failed', ['id' => $id, 'error' => $e->getMessage()]);
         }
     }
-
+    
+    #[Title('Daftar Produk')]
     public function render()
     {
         $products = Product::query()
             ->when($this->search, function ($query) {
-                $query->where('nama', 'like', '%' . $this->search . '%')
-                    ->orWhere('sku', 'like', '%' . $this->search . '%');
+                $query->where(function ($q) {
+                    $q->where('nama', 'like', '%' . $this->search . '%')
+                      ->orWhere('sku', 'like', '%' . $this->search . '%')
+                      ->orWhere('deskripsi', 'like', '%' . $this->search . '%');
+                });
             })
-            ->when($this->filterCategory, function ($query) {
-                $query->where('kategori', $this->filterCategory);
+            ->when($this->filterKategori, function ($query) {
+                $query->where('kategori', $this->filterKategori);
             })
-            ->orderBy('nama')
+            ->orderBy('created_at', 'desc')
             ->paginate(10);
-
-        $categories = Product::distinct()->pluck('kategori');
-
+        
+        $kategoris = Product::select('kategori')
+            ->distinct()
+            ->orderBy('kategori')
+            ->pluck('kategori');
+        
         return view('livewire.product-list', [
             'products' => $products,
-            'categories' => $categories,
+            'kategoris' => $kategoris,
         ]);
     }
 }

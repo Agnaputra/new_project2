@@ -1,141 +1,158 @@
-<div class="p-6">
-    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 space-y-4 lg:space-y-0">
-        <h2 class="text-3xl font-bold text-gray-800">📦 Data Produk</h2>
-        <div class="flex space-x-3">
-            <a href="{{ route('products.import') }}" 
-                class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                </svg>
-                Import Excel
-            </a>
-            <a href="{{ route('products.create') }}" 
-                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Tambah Produk
-            </a>
-        </div>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">📦 Daftar Produk</h1>
+        <p class="text-gray-600 mt-1">Kelola inventory produk Anda</p>
     </div>
-
+    
+    <!-- Flash Messages - PERSISTENT (Tidak Auto-Hide) -->
     @if (session()->has('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            {{ session('success') }}
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 flex justify-between items-center">
+            <span>{{ session('success') }}</span>
+            <button onclick="this.parentElement.remove()" class="text-green-700 hover:text-green-900 font-bold">
+                ×
+            </button>
         </div>
     @endif
-
+    
+    @if (session()->has('error'))
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 flex justify-between items-center">
+            <span>{{ session('error') }}</span>
+            <button onclick="this.parentElement.remove()" class="text-red-700 hover:text-red-900 font-bold">
+                ×
+            </button>
+        </div>
+    @endif
+    
     <!-- Filters -->
-    <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">🔍 Cari Produk</label>
-                <input type="text" wire:model.live.debounce.300ms="search" 
-                    placeholder="Nama produk atau SKU..."
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+    <div class="bg-white rounded-lg shadow p-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="md:col-span-2">
+                <input type="text" 
+                       wire:model.live.debounce.300ms="search" 
+                       placeholder="🔍 Cari produk (nama, SKU, deskripsi)..."
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">📂 Filter Kategori</label>
-                <select wire:model.live="filterCategory" 
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                <select wire:model.live="filterKategori" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <option value="">Semua Kategori</option>
-                    @foreach($categories as $category)
-                        <option value="{{ $category }}">{{ $category }}</option>
+                    @foreach($kategoris as $kat)
+                        <option value="{{ $kat }}">{{ $kat }}</option>
                     @endforeach
                 </select>
             </div>
         </div>
     </div>
-
+    
     <!-- Products Table -->
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produk</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga Beli</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Margin</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga Jual</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stok</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($products as $product)
-                    <tr class="hover:bg-gray-50 {{ $product->is_low_stock ? 'bg-red-50' : '' }}">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div>
-                                    <div class="text-sm font-medium text-gray-900">{{ $product->nama }}</div>
-                                    @if($product->sku)
-                                        <div class="text-xs text-gray-500">SKU: {{ $product->sku }}</div>
-                                    @endif
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                                {{ $product->kategori }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            Rp {{ number_format($product->harga_beli, 0, ',', '.') }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ $product->margin }}%
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
-                            Rp {{ number_format($product->harga_jual, 0, ',', '.') }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <span class="text-sm font-bold {{ $product->is_low_stock ? 'text-red-600' : 'text-gray-900' }}">
-                                    {{ $product->stok }}
-                                </span>
-                                @if($product->is_low_stock)
-                                    <svg class="w-4 h-4 text-red-500 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                    </svg>
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ $product->nama }}</div>
+                                @if($product->deskripsi)
+                                    <div class="text-xs text-gray-500 truncate max-w-xs">{{ Str::limit($product->deskripsi, 50) }}</div>
                                 @endif
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div class="flex space-x-2">
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    {{ $product->kategori }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    <span class="font-medium">Rp {{ number_format($product->harga_jual, 0, ',', '.') }}</span>
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    Beli: Rp {{ number_format($product->harga_beli, 0, ',', '.') }} • Margin: {{ $product->margin }}%
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if($product->is_low_stock)
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                                        ⚠️ {{ $product->stok }} (Rendah)
+                                    </span>
+                                @else
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                        ✓ {{ $product->stok }}
+                                    </span>
+                                @endif
+                                <div class="text-xs text-gray-500 mt-1">Min: {{ $product->stok_minimum }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ $product->sku ?? '-' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <a href="{{ route('products.edit', $product->id) }}" 
-                                    class="text-blue-600 hover:text-blue-900">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                    </svg>
+                                   class="text-blue-600 hover:text-blue-900 mr-3">
+                                    ✏️ Edit
                                 </a>
                                 <button wire:click="delete({{ $product->id }})" 
-                                    wire:confirm="Yakin ingin menghapus produk ini?"
-                                    class="text-red-600 hover:text-red-900">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
+                                        wire:confirm="Yakin ingin menghapus produk '{{ $product->nama }}'?"
+                                        class="text-red-600 hover:text-red-900">
+                                    🗑️ Hapus
                                 </button>
-                            </div>
-                        </td>
-                    </tr>
+                            </td>
+                        </tr>
                     @empty
-                    <tr>
-                        <td colspan="7" class="px-6 py-12 text-center">
-                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-                            </svg>
-                            <p class="mt-2 text-sm text-gray-500">Belum ada produk</p>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center">
+                                <div class="text-gray-400">
+                                    <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                                    </svg>
+                                    <p class="mt-4 text-lg font-medium">Belum ada produk</p>
+                                    <p class="mt-1 text-sm">Mulai dengan menambahkan produk baru</p>
+                                    <a href="{{ route('products.create') }}" 
+                                       class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                        + Tambah Produk
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-
+        
         <!-- Pagination -->
-        <div class="px-6 py-4 border-t border-gray-200">
-            {{ $products->links() }}
+        @if($products->hasPages())
+            <div class="bg-white px-4 py-3 border-t border-gray-200">
+                {{ $products->links() }}
+            </div>
+        @endif
+    </div>
+    
+    <!-- Stats Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        <div class="bg-white rounded-lg shadow p-4">
+            <div class="text-sm text-gray-500">Total Produk</div>
+            <div class="text-2xl font-bold text-gray-900">{{ $products->total() }}</div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+            <div class="text-sm text-gray-500">Stok Rendah</div>
+            <div class="text-2xl font-bold text-red-600">
+                {{ \App\Models\Product::lowStock()->count() }}
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+            <div class="text-sm text-gray-500">Kategori</div>
+            <div class="text-2xl font-bold text-gray-900">{{ $kategoris->count() }}</div>
         </div>
     </div>
 </div>

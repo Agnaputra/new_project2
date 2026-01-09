@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Product;
 use Livewire\Component;
+use Livewire\Attributes\Title;
 
 class ProductForm extends Component
 {
@@ -17,26 +18,9 @@ class ProductForm extends Component
     public $stok_minimum = 5;
     public $sku = '';
     public $deskripsi = '';
-
     public $isEdit = false;
 
-    // Validation messages untuk bahasa Indonesia
-    protected $messages = [
-        'nama.required' => 'Nama produk harus diisi',
-        'nama.min' => 'Nama produk minimal 3 karakter',
-        'kategori.required' => 'Kategori harus dipilih',
-        'harga_beli.required' => 'Harga beli harus diisi',
-        'harga_beli.numeric' => 'Harga beli harus berupa angka',
-        'harga_beli.min' => 'Harga beli tidak boleh negatif',
-        'margin.required' => 'Margin harus diisi',
-        'margin.numeric' => 'Margin harus berupa angka',
-        'stok.required' => 'Stok harus diisi',
-        'stok.integer' => 'Stok harus berupa angka bulat',
-        'stok_minimum.required' => 'Stok minimum harus diisi',
-        'sku.unique' => 'SKU sudah digunakan produk lain',
-    ];
-
-    public function rules()
+    protected function rules()
     {
         $skuRule = $this->isEdit && $this->productId 
             ? 'nullable|string|max:100|unique:products,sku,' . $this->productId
@@ -54,8 +38,25 @@ class ProductForm extends Component
         ];
     }
 
+    protected $messages = [
+        'nama.required' => 'Nama produk harus diisi',
+        'nama.min' => 'Nama produk minimal 3 karakter',
+        'kategori.required' => 'Kategori harus dipilih',
+        'harga_beli.required' => 'Harga beli harus diisi',
+        'harga_beli.numeric' => 'Harga beli harus berupa angka',
+        'harga_beli.min' => 'Harga beli tidak boleh negatif',
+        'margin.required' => 'Margin harus diisi',
+        'margin.numeric' => 'Margin harus berupa angka',
+        'stok.required' => 'Stok harus diisi',
+        'stok.integer' => 'Stok harus berupa angka bulat',
+        'stok_minimum.required' => 'Stok minimum harus diisi',
+        'sku.unique' => 'SKU sudah digunakan produk lain',
+    ];
+
     public function mount($id = null)
     {
+        \Log::info('=== PRODUCT FORM MOUNTED ===', ['id' => $id]);
+        
         if ($id) {
             $this->isEdit = true;
             $this->productId = $id;
@@ -67,6 +68,7 @@ class ProductForm extends Component
                 return redirect()->route('products.index');
             }
             
+            // Langsung isi semua field tanpa reactive loading
             $this->nama = $product->nama;
             $this->kategori = $product->kategori;
             $this->harga_beli = (float) $product->harga_beli;
@@ -76,17 +78,24 @@ class ProductForm extends Component
             $this->stok_minimum = (int) $product->stok_minimum;
             $this->sku = $product->sku ?? '';
             $this->deskripsi = $product->deskripsi ?? '';
+            
+            \Log::info('Product loaded for edit', ['product' => $product->toArray()]);
         } else {
-            $this->calculateHargaJual();
+            // Set default values untuk produk baru
+            $this->margin = 30;
+            $this->stok = 0;
+            $this->stok_minimum = 5;
         }
+        
+        $this->calculateHargaJual();
     }
 
-    public function updatedHargaBeli($value)
+    public function updatedHargaBeli()
     {
         $this->calculateHargaJual();
     }
 
-    public function updatedMargin($value)
+    public function updatedMargin()
     {
         $this->calculateHargaJual();
     }
@@ -96,7 +105,7 @@ class ProductForm extends Component
         $hargaBeli = (float) $this->harga_beli;
         $margin = (float) $this->margin;
         
-        if ($hargaBeli > 0) {
+        if ($hargaBeli > 0 && $margin >= 0) {
             $this->harga_jual = $hargaBeli * (1 + ($margin / 100));
         } else {
             $this->harga_jual = 0;
@@ -105,76 +114,90 @@ class ProductForm extends Component
 
     public function save()
     {
-        // Log untuk debugging
-        \Log::info('Save method called', [
+        \Log::info('=== SAVE METHOD CALLED ===');
+        \Log::info('Form data:', [
             'nama' => $this->nama,
             'kategori' => $this->kategori,
+            'harga_beli' => $this->harga_beli,
+            'margin' => $this->margin,
+            'stok' => $this->stok,
             'isEdit' => $this->isEdit,
+            'productId' => $this->productId,
         ]);
 
-        // Calculate ulang sebelum validate
-        $this->calculateHargaJual();
-
         // Validate
-        try {
-            $validated = $this->validate();
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            // Log validation errors
-            \Log::error('Validation failed', ['errors' => $e->errors()]);
-            
-            // Set flash message untuk error validasi
-            $errorMessages = collect($e->errors())->flatten()->implode(', ');
-            session()->flash('error', '❌ Validasi gagal: ' . $errorMessages);
-            return;
-        }
+        $this->validate();
 
+        // Prepare data
         $data = [
             'nama' => trim($this->nama),
             'kategori' => $this->kategori,
             'harga_beli' => (float) $this->harga_beli,
             'margin' => (float) $this->margin,
-            'harga_jual' => (float) $this->harga_jual,
             'stok' => (int) $this->stok,
             'stok_minimum' => (int) $this->stok_minimum,
             'sku' => $this->sku ? trim($this->sku) : null,
             'deskripsi' => $this->deskripsi ? trim($this->deskripsi) : null,
         ];
 
+        \Log::info('Data to save:', $data);
+
         try {
             if ($this->isEdit && $this->productId) {
+                // UPDATE
                 $product = Product::findOrFail($this->productId);
                 $product->update($data);
                 
-                \Log::info('Product updated successfully', ['id' => $this->productId]);
+                \Log::info('Product updated', [
+                    'id' => $product->id,
+                    'harga_jual' => $product->harga_jual,
+                ]);
                 
                 session()->flash('success', '✅ Produk "' . $this->nama . '" berhasil diupdate!');
             } else {
+                // CREATE
                 $product = Product::create($data);
                 
-                \Log::info('Product created successfully', ['id' => $product->id]);
+                \Log::info('Product created', [
+                    'id' => $product->id,
+                    'harga_jual' => $product->harga_jual,
+                ]);
                 
                 session()->flash('success', '✅ Produk "' . $this->nama . '" berhasil ditambahkan!');
             }
 
-            // PENTING: Gunakan redirect dengan return
-            return $this->redirect(route('products.index'), navigate: true);
+            \Log::info('Redirecting to products.index');
+            
+            // PENTING: Gunakan redirect() tanpa wire:navigate untuk force refresh
+            return redirect()->route('products.index');
             
         } catch (\Illuminate\Database\QueryException $e) {
-            \Log::error('Database error', ['message' => $e->getMessage()]);
+            \Log::error('Database error', [
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+            ]);
             
             if (str_contains($e->getMessage(), 'Duplicate entry')) {
                 session()->flash('error', '❌ SKU sudah digunakan produk lain!');
             } else {
-                session()->flash('error', '❌ Database Error: ' . $e->getMessage());
+                session()->flash('error', '❌ Error database: ' . $e->getMessage());
             }
+            
         } catch (\Exception $e) {
-            \Log::error('General error', ['message' => $e->getMessage()]);
+            \Log::error('Unexpected error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            
             session()->flash('error', '❌ Error: ' . $e->getMessage());
         }
     }
 
     public function render()
     {
-        return view('livewire.product-form');
+        return view('livewire.product-form')
+            ->layout('layouts.app', ['title' => $this->isEdit ? 'Edit Produk' : 'Tambah Produk']);
     }
 }

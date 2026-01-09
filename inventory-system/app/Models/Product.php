@@ -55,7 +55,7 @@ class Product extends Model
 
         static::saving(function ($product) {
             // Auto-calculate harga_jual dari harga_beli dan margin
-            if ($product->harga_beli && $product->margin) {
+            if ($product->harga_beli && $product->margin !== null) {
                 $product->harga_jual = $product->harga_beli * (1 + ($product->margin / 100));
             }
         });
