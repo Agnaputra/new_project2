@@ -1,13 +1,12 @@
-<div class="max-w-7xl mx-auto">
-    
-    <!-- Header -->
-    <div class="mb-6 flex justify-between items-center">
+<div>
+    <!-- Header dengan Tombol Tambah Produk -->
+    <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
             <h1 class="text-3xl font-bold text-gray-900">📦 Daftar Produk</h1>
             <p class="text-gray-600 mt-1">Kelola inventory produk Anda</p>
         </div>
         <a href="{{ route('products.create') }}" 
-           class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200">
+           class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
@@ -15,22 +14,18 @@
         </a>
     </div>
     
-    <!-- Flash Messages - PERSISTENT (Tidak Auto-Hide) -->
+    <!-- Flash Messages -->
     @if (session()->has('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 flex justify-between items-center">
             <span>{{ session('success') }}</span>
-            <button onclick="this.parentElement.remove()" class="text-green-700 hover:text-green-900 font-bold">
-                ×
-            </button>
+            <button onclick="this.parentElement.remove()" class="text-green-700 hover:text-green-900 font-bold text-xl">×</button>
         </div>
     @endif
     
     @if (session()->has('error'))
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 flex justify-between items-center">
             <span>{{ session('error') }}</span>
-            <button onclick="this.parentElement.remove()" class="text-red-700 hover:text-red-900 font-bold">
-                ×
-            </button>
+            <button onclick="this.parentElement.remove()" class="text-red-700 hover:text-red-900 font-bold text-xl">×</button>
         </div>
     @endif
     
@@ -41,11 +36,11 @@
                 <input type="text" 
                        wire:model.live.debounce.300ms="search" 
                        placeholder="🔍 Cari produk (nama, SKU, deskripsi)..."
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
             </div>
             <div>
                 <select wire:model.live="filterKategori" 
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                     <option value="">Semua Kategori</option>
                     @foreach($kategoris as $kat)
                         <option value="{{ $kat }}">{{ $kat }}</option>
@@ -128,7 +123,7 @@
                                     <p class="mt-4 text-lg font-medium">Belum ada produk</p>
                                     <p class="mt-1 text-sm">Mulai dengan menambahkan produk baru</p>
                                     <a href="{{ route('products.create') }}" 
-                                       class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                       class="mt-4 inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
                                         + Tambah Produk
                                     </a>
                                 </div>
