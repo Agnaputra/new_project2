@@ -6,9 +6,7 @@ use App\Models\Product;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
-use Livewire\Attributes\Layout;
 
-#[Layout('layouts.app')]
 class ProductList extends Component
 {
     use WithPagination;
@@ -72,6 +70,6 @@ class ProductList extends Component
         return view('livewire.product-list', [
             'products' => $products,
             'kategoris' => $kategoris,
-        ]);
+        ])->layout('layouts.app', ['title' => 'Daftar Produk']);
     }
 }
