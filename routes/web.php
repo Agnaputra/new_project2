@@ -8,6 +8,7 @@ use App\Livewire\ProductList;
 use App\Livewire\SalesTransaction;
 use App\Livewire\SalesReport;
 use App\Livewire\ProfitReport;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -39,6 +40,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Export Routes
+Route::get('/reports/sales/export', [ReportController::class, 'exportSales'])->name('reports.sales.export');
+Route::get('/reports/profit/export', [ReportController::class, 'exportProfit'])->name('reports.profit.export');
+
+// Logout Route
+Route::post('/logout', function () {
+    auth()->logout();
+    return redirect('/');
+})->name('logout');
+
 });
 
 require __DIR__.'/auth.php';

@@ -11,13 +11,15 @@ return new class extends Migration
         Schema::create('sales', function (Blueprint $table) {
             $table->id();
             $table->string('invoice_number')->unique();
-            $table->decimal('total_harga', 15, 2);
-            $table->decimal('total_profit', 15, 2);
             $table->string('customer_name')->nullable();
+            $table->decimal('total', 15, 2)->default(0);
+            $table->decimal('profit', 15, 2)->default(0);
+            $table->string('payment_method')->default('cash');
             $table->text('notes')->nullable();
             $table->timestamps();
             
             $table->index('created_at');
+            $table->index('invoice_number');
         });
     }
 
