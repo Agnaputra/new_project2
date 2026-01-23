@@ -7,138 +7,134 @@
 
     <title>{{ $title ?? 'Inventory System' }}</title>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Styles & Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    
-
-    <!-- Livewire Styles -->
     @livewireStyles
+    <style>
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans antialiased">
+<body class="bg-[#F8FAFC] text-slate-900 antialiased">
 
-    <div class="min-h-screen flex">
-        <!-- Sidebar Navigation -->
+    <div class="min-h-screen flex overflow-hidden">
         <aside
-            class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-300 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-0 flex flex-col shadow-xl"
+            class="fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 text-slate-300 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col shadow-2xl border-r border-slate-800"
             :class="mobileMenu ? 'translate-x-0' : '-translate-x-full'">
 
-            <!-- Header -->
-            <div class="p-6 bg-slate-950 flex items-center justify-between">
-                <div>
-                    <h1 class="text-xl font-bold text-white flex items-center gap-2">
-                        <span class="text-2xl">📦</span> Inventory Pro
-                    </h1>
-                    <p class="text-slate-500 text-[10px] uppercase tracking-widest font-bold mt-1">Management System</p>
+            <div class="p-8">
+                <div class="flex items-center gap-3 group cursor-default">
+                    <div class="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-transform">
+                        <span class="text-xl">📦</span>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-white tracking-tight leading-none">Inventory Pro</h1>
+                        <p class="text-slate-500 text-[10px] uppercase tracking-[0.2em] font-bold mt-1">v.2.0.1</p>
+                    </div>
                 </div>
-                <button @click="mobileMenu = false" class="lg:hidden text-slate-400 hover:text-white">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
             </div>
 
-            <!-- Navigation Menu -->
-            <nav class="mt-4 flex-1 overflow-y-auto px-4 space-y-1">
-                <!-- Dashboard -->
-                <div class="pb-2">
-                    <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest px-3 mb-2">Main Menu</p>
-                    <a href="{{ route('dashboard') }}"
-                       class="flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group {{ request()->routeIs('dashboard') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'hover:bg-slate-800 hover:text-white' }}">
-                        <svg class="w-5 h-5 mr-3 {{ request()->routeIs('dashboard') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                        </svg>
-                        <span class="text-sm font-medium">Dashboard</span>
-                    </a>
+            <nav class="flex-1 overflow-y-auto px-4 space-y-8 scrollbar-hide">
+                
+                <div>
+                    <p class="px-4 text-[11px] font-bold text-slate-500 uppercase tracking-[0.15em] mb-4">Workspace</p>
+                    <div class="space-y-1">
+                        @php
+                            $navItems = [
+                                ['route' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
+                                ['route' => 'products.index', 'label' => 'Inventory', 'icon' => 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'],
+                                ['route' => 'sales.transaction', 'label' => 'Point of Sale', 'icon' => 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z'],
+                            ];
+                        @endphp
+
+                        @foreach($navItems as $item)
+                        <a href="{{ route($item['route']) }}"
+                           class="relative group flex items-center px-4 py-3 rounded-xl transition-all duration-300 {{ request()->routeIs($item['route'].'*') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'hover:bg-white/5 hover:text-white' }}">
+                            @if(request()->routeIs($item['route'].'*'))
+                                <span class="absolute left-0 w-1 h-6 bg-white rounded-r-full"></span>
+                            @endif
+                            <svg class="w-5 h-5 mr-3 {{ request()->routeIs($item['route'].'*') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400' }} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"/>
+                            </svg>
+                            <span class="text-sm font-semibold">{{ $item['label'] }}</span>
+                        </a>
+                        @endforeach
+                    </div>
                 </div>
 
-                <!-- Inventory -->
-                <div class="pb-2">
-                    <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest px-3 mb-2">Inventory</p>
-                    <a href="{{ route('products.index') }}"
-                       class="flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group {{ request()->routeIs('products.*') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'hover:bg-slate-800 hover:text-white' }}">
-                        <svg class="w-5 h-5 mr-3 {{ request()->routeIs('products.*') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                        </svg>
-                        <span class="text-sm font-medium">Data Produk</span>
-                    </a>
-                </div>
-
-                <!-- Sales -->
-                <div class="pb-2">
-                    <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest px-3 mb-2">Sales</p>
-                    <a href="{{ route('sales.transaction') }}"
-                       class="flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group {{ request()->routeIs('sales.transaction') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'hover:bg-slate-800 hover:text-white' }}">
-                        <svg class="w-5 h-5 mr-3 {{ request()->routeIs('sales.transaction') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                        </svg>
-                        <span class="text-sm font-medium">Transaksi</span>
-                    </a>
-                </div>
-
-                <!-- Reports -->
-                <div class="pb-2">
-                    <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest px-3 mb-2">Reports</p>
-                    <a href="{{ route('reports.sales') }}"
-                       class="flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group {{ request()->routeIs('reports.sales') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'hover:bg-slate-800 hover:text-white' }}">
-                        <svg class="w-5 h-5 mr-3 {{ request()->routeIs('reports.sales') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                        </svg>
-                        <span class="text-sm font-medium">Laporan Penjualan</span>
-                    </a>
-                    <a href="{{ route('reports.profit') }}"
-                       class="flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group {{ request()->routeIs('reports.profit') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'hover:bg-slate-800 hover:text-white' }}">
-                        <svg class="w-5 h-5 mr-3 {{ request()->routeIs('reports.profit') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
-                        </svg>
-                        <span class="text-sm font-medium">Laporan Profit</span>
-                    </a>
+                <div>
+                    <p class="px-4 text-[11px] font-bold text-slate-500 uppercase tracking-[0.15em] mb-4">Analytics</p>
+                    <div class="space-y-1">
+                        <a href="{{ route('reports.sales') }}" class="group flex items-center px-4 py-3 rounded-xl transition-all hover:bg-white/5 hover:text-white">
+                            <svg class="w-5 h-5 mr-3 text-slate-500 group-hover:text-emerald-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                            <span class="text-sm font-semibold">Penjualan</span>
+                        </a>
+                        <a href="{{ route('reports.profit') }}" class="group flex items-center px-4 py-3 rounded-xl transition-all hover:bg-white/5 hover:text-white">
+                            <svg class="w-5 h-5 mr-3 text-slate-500 group-hover:text-amber-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
+                            </svg>
+                            <span class="text-sm font-semibold">Profit</span>
+                        </a>
+                    </div>
                 </div>
             </nav>
 
-            <!-- User Profile Footer -->
-            <div class="p-4 bg-slate-950 border-t border-slate-800">
-                <div class="flex items-center p-2 rounded-xl bg-slate-900 border border-slate-800">
-                    <a href="{{ route('profile.edit') }}" class="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white shadow-inner hover:bg-indigo-500 transition">
-                        {{ substr(auth()->user()->name ?? 'A', 0, 1) }}
-                    </a>
-                    <div class="ml-3 flex-1 min-w-0">
-                        <p class="text-xs font-bold text-white truncate">{{ auth()->user()->name ?? 'Admin' }}</p>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="text-[10px] text-rose-400 hover:text-rose-300 font-bold uppercase transition">Logout</button>
-                        </form>
+            <div class="p-4 mt-auto">
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-500 flex items-center justify-center font-bold text-white shadow-inner">
+                            {{ substr(auth()->user()->name ?? 'A', 0, 1) }}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold text-white truncate">{{ auth()->user()->name ?? 'Administrator' }}</p>
+                            <p class="text-[10px] text-slate-500 font-medium truncate uppercase tracking-tighter">System Manager</p>
+                        </div>
                     </div>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="w-full py-2.5 rounded-xl bg-rose-500/10 text-rose-500 text-xs font-bold hover:bg-rose-500 hover:text-white transition-all duration-300 tracking-widest uppercase">
+                            Logout System
+                        </button>
+                    </form>
                 </div>
             </div>
         </aside>
 
-        <!-- Main Content Area -->
-        <div class="flex-1 flex flex-col min-h-screen">
-            <!-- Top Bar (Mobile) -->
-            <header class="lg:hidden bg-white shadow-sm border-b border-gray-200 p-4 flex items-center justify-between sticky top-0 z-40">
-                <button @click="mobileMenu = true" class="text-gray-700 hover:text-indigo-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
-                </button>
-                <h2 class="text-lg font-bold text-gray-800">📦 Inventory Pro</h2>
-                <div class="w-6"></div>
+        <div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+            <header class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-40">
+                <div class="flex items-center gap-4">
+                    <button @click="mobileMenu = true" class="lg:hidden p-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                    <h2 class="hidden md:block text-sm font-semibold text-slate-500 uppercase tracking-[0.2em]">Inventory Management / <span class="text-slate-900">{{ $title ?? 'Dashboard' }}</span></h2>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <div class="hidden sm:flex flex-col items-end">
+                        <span class="text-xs font-bold text-slate-400">{{ now()->format('l, d F Y') }}</span>
+                        <span class="text-[10px] text-emerald-500 font-black tracking-widest uppercase">System Online</span>
+                    </div>
+                </div>
             </header>
 
-            <!-- Page Content -->
-            <main class="flex-1 p-6 overflow-y-auto">
-                {{ $slot }}
+            <main class="flex-1 p-8 lg:p-12 overflow-y-auto scroll-smooth">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    {{ $slot }}
+                </div>
             </main>
         </div>
     </div>
 
-    <!-- Mobile Menu Overlay -->
     <div x-show="mobileMenu"
+         x-cloak
          @click="mobileMenu = false"
          x-transition:enter="transition-opacity ease-linear duration-300"
          x-transition:enter-start="opacity-0"
@@ -146,11 +142,9 @@
          x-transition:leave="transition-opacity ease-linear duration-300"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
-         class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-         style="display: none;">
+         class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 lg:hidden">
     </div>
 
-    <!-- Livewire Scripts -->
     @livewireScripts
 </body>
 </html>

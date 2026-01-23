@@ -29,6 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // Sales Transaction
     Route::get('/sales/transaction', SalesTransaction::class)->name('sales.transaction');
+    Route::get('/sales/{id}', SalesTransaction::class)->name('sales.show'); // Route yang missing
     
     // Reports Routes
     Route::get('/reports/sales', SalesReport::class)->name('reports.sales');
